@@ -7,7 +7,7 @@ import retrofit2.http.Query
 
 interface CurrencyClient {
 
-    @GET("latest?base={base}")
+    @GET("latest")
     fun getCurrencies(@Query("base") base: String): Call<InternalCurrency>
 
 }
