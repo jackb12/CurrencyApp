@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Currency App</string>
+
+    <string name="toolbar_title">Rates</string>
+</resources>
