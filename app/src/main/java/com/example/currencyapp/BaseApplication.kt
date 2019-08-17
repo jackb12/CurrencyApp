@@ -2,27 +2,32 @@ package com.example.currencyapp
 
 import android.app.Application
 import com.example.currencyapp.dagger.ApplicationComponent
-import com.example.currencyapp.dagger.ApplicationModule
+import com.example.currencyapp.dagger.modules.ApplicationModule
 import com.example.currencyapp.dagger.DaggerApplicationComponent
 
 class BaseApplication : Application() {
 
-    private var instance: BaseApplication? = null
-    private var applicationComponent: ApplicationComponent? = null
+    companion object {
+        private var instance: BaseApplication? = null
+        private var applicationComponent: ApplicationComponent? = null
 
-    fun getInstance(): BaseApplication? {
-        return instance
+        fun getInstance(): BaseApplication? {
+            return instance
+        }
+
+        fun getComponent(): ApplicationComponent? {
+            return applicationComponent
+        }
     }
-
-    fun getComponent(): ApplicationComponent? {
-        return applicationComponent
-    }
-
 
     override fun onCreate() {
         super.onCreate()
 
         instance = this
-        applicationComponent = DaggerApplicationComponent.builder().applicationModule(ApplicationModule(this)).build()
+        applicationComponent = DaggerApplicationComponent.builder().applicationModule(
+            ApplicationModule(
+                this
+            )
+        ).build()
     }
 }

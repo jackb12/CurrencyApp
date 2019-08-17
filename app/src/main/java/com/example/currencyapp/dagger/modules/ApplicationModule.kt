@@ -1,4 +1,4 @@
-package com.example.currencyapp.dagger
+package com.example.currencyapp.dagger.modules
 
 import com.example.currencyapp.BaseApplication
 import dagger.Module

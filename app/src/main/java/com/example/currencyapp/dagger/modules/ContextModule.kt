@@ -1,4 +1,4 @@
-package com.example.currencyapp.dagger
+package com.example.currencyapp.dagger.modules
 
 import android.app.Application
 import android.content.Context

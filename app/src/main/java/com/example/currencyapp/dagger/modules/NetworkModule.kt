@@ -1,4 +1,4 @@
-package com.example.currencyapp.dagger
+package com.example.currencyapp.dagger.modules
 
 import dagger.Module
 import dagger.Provides
@@ -16,12 +16,13 @@ class NetworkModule {
         private const val TIMEOUT = 1
     }
 
+
     @Provides
     @Singleton
-    internal fun provideRetorfit(okHttpClientBuilder: OkHttpClient.Builder): Retrofit =
+    internal fun provideRetrofit(okHttpClientBuilder: OkHttpClient.Builder, gsonConverterFactory: GsonConverterFactory): Retrofit =
         Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(gsonConverterFactory)
             .client(okHttpClientBuilder.build())
             .build()
 
@@ -30,5 +31,10 @@ class NetworkModule {
     @Singleton
     internal fun provideOkHttpClientBuilder(): OkHttpClient.Builder =
         (OkHttpClient.Builder()).connectTimeout(TIMEOUT.toLong(), TimeUnit.SECONDS)
+
+
+    @Provides
+    @Singleton
+    internal fun provideGsonConverterFactory() = GsonConverterFactory.create()
 
 }
