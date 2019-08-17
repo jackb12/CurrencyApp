@@ -29,9 +29,9 @@ class CurrencyFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         viewModel = ViewModelProviders.of(this)[CurrencyViewModel::class.java]
-        viewModel.getUsers().observe(viewLifecycleOwner, Observer<List<Currency>>{ currencies ->
-            // update UI
-        })
+//        viewModel.getUsers().observe(viewLifecycleOwner, Observer<List<Currency>>{ currencies ->
+//            // update UI
+//        })
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

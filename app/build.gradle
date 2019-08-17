@@ -4,6 +4,8 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+apply plugin: 'kotlin-kapt'
+
 android {
     compileSdkVersion 28
     defaultConfig {
@@ -19,6 +21,10 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
@@ -37,8 +43,7 @@ dependencies {
 
     // butterknife
     implementation 'com.jakewharton:butterknife:10.1.0'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:10.1.0'
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
+    kapt 'com.jakewharton:butterknife-compiler:10.1.0'
 
     // coroutines
     api "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1"
@@ -48,4 +53,12 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:3.11.0'
     // gson convertor
     implementation 'com.squareup.retrofit2:converter-gson:2.6.0'
+
+
+    // Dagger 2
+    implementation "com.google.dagger:dagger:2.24"
+    kapt "com.google.dagger:dagger-compiler:2.24"
+    compileOnly "org.glassfish:javax.annotation:3.1.1"
+
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
 }
