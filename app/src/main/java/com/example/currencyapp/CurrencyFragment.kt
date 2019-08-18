@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import butterknife.BindView
 import com.example.currencyapp.Resource.Companion.ERROR
 import com.example.currencyapp.Resource.Companion.SUCCESS
+import com.example.currencyapp.api.model.Country
 import com.example.currencyapp.api.model.Currency
 
 class CurrencyFragment : Fragment() {
@@ -46,6 +47,17 @@ class CurrencyFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewModel.countriesLiveData.observe(viewLifecycleOwner, Observer<Resource<List<Country>>> { resource ->
+            when (resource.status) {
+                SUCCESS -> {
+                    resource.data?.let {
+                        onLoaded2(it)
+                    }
+                }
+                ERROR -> onLoadingFailed()
+            }
+        })
+
         viewModel.currencyLiveData.observe(viewLifecycleOwner, Observer<Resource<Currency>> { resource ->
             when (resource.status) {
                 SUCCESS -> {
@@ -57,15 +69,24 @@ class CurrencyFragment : Fragment() {
             }
         })
 
+
+        viewModel.getCountries()
         viewModel.getCurrencies(EUR)
     }
 
 
-    private fun onLoaded(it: Currency) {
-        Log.e("CURRENCY", "$it")
+    private fun onLoaded(currency: Currency) {
+        Log.e("CURRENCY", "$currency")
     }
 
+
+    private fun onLoaded2(countries: List<Country>) {
+        Log.e("COUNTRIES", "$countries")
+    }
+
+
     private fun onLoading() {}
+
 
     private fun onLoadingFailed() {}
 }

@@ -1,5 +1,6 @@
 package com.example.currencyapp.dagger
 
+import com.example.currencyapp.api.request.GetCountries
 import com.example.currencyapp.api.request.GetCurrencies
 import com.example.currencyapp.dagger.modules.ApiModule
 import com.example.currencyapp.dagger.modules.ApplicationModule
@@ -13,4 +14,5 @@ import javax.inject.Singleton
 interface ApplicationComponent {
 
     fun inject(getCurrencies: GetCurrencies)
+    fun inject(getCountries: GetCountries)
 }

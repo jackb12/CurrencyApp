@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <ImageView
+            android:id="@+id/currency_country_image"
+            android:layout_width="@dimen/min_button_width"
+            android:layout_height="@dimen/min_button_height"
+            android:layout_margin="@dimen/double_margin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:background="@color/colorAccent"/>
+
+    <TextView
+            android:id="@+id/currency_country_code"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/double_margin"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="@dimen/single_margin"
+            android:textSize="@dimen/large_text_size"
+            android:textColor="@color/textColourBlack"
+            android:textAllCaps="true"
+            app:layout_constraintStart_toEndOf="@id/currency_country_image"
+            app:layout_constraintTop_toTopOf="@id/currency_country_image"
+            app:layout_constraintBottom_toTopOf="@id/currency_description"
+            tools:text="USD" app:layout_constraintEnd_toStartOf="@+id/currency_amount"/>
+
+    <TextView
+            android:id="@+id/currency_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/double_margin"
+            android:layout_marginEnd="8dp"
+            android:textColor="@color/textColourGrey"
+            android:layout_marginBottom="@dimen/single_margin"
+            app:layout_constraintStart_toEndOf="@id/currency_country_image"
+            app:layout_constraintTop_toBottomOf="@id/currency_country_code"
+            app:layout_constraintBottom_toBottomOf="@id/currency_country_image"
+            tools:text="US Dollar" app:layout_constraintEnd_toStartOf="@+id/currency_amount"/>
+
+    <EditText
+            android:id="@+id/currency_amount"
+            android:layout_width="wrap_content"
+            android:minWidth="@dimen/min_button_width"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/double_margin"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="1183.06"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
