@@ -8,14 +8,14 @@ import androidx.room.Update
 @Dao
 interface CurrencyDao {
 
-    @Query("SELECT * FROM currency")
-    fun getAll(): List<CurrencyRates>
+    @Query("SELECT * FROM CurrencyRate")
+    fun getAll(): List<CurrencyRate>
 
 
     @Insert
-    fun insertAll(vararg currencyRates: CurrencyRates)
+    fun insertAll(currencyRates: List<CurrencyRate>)
 
 
     @Update
-    fun updateCurrencies(vararg currencyRates: CurrencyRates)
+    fun updateCurrencies(vararg currencyRates: CurrencyRate)
 }

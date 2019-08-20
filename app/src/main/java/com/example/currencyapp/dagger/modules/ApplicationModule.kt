@@ -1,5 +1,6 @@
 package com.example.currencyapp.dagger.modules
 
+import android.content.Context
 import com.example.currencyapp.BaseApplication
 import dagger.Module
 import dagger.Provides
@@ -13,5 +14,9 @@ class ApplicationModule(
     @Provides
     @Singleton
     internal fun provideApplication() = baseApplication
+
+
+    @Provides fun provideContext(): Context = baseApplication.applicationContext
+
 
 }

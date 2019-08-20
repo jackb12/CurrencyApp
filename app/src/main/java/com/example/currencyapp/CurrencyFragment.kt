@@ -70,8 +70,8 @@ class CurrencyFragment : Fragment() {
         })
 
 
-        viewModel.getCountries()
-        viewModel.getCurrencies(EUR)
+//        viewModel.getCountries()
+//        viewModel.getCurrencies(EUR)
     }
 
 

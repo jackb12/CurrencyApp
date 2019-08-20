@@ -7,17 +7,17 @@ import com.example.currencyapp.api.model.Currency
 import com.example.currencyapp.livedata.CountryLiveData
 import com.example.currencyapp.livedata.CurrencyLiveData
 import com.example.currencyapp.repository.CurrencyRepository
-import com.example.currencyapp.room.CurrencyRates
+import com.example.currencyapp.room.CurrencyRate
 
 class CurrencyViewModel : ViewModel() {
 
     private val repository: CurrencyRepository
-    val currencies: LiveData<Resource<List<CurrencyRates>>>
+//    val currencies: LiveData<Resource<List<CurrencyRate>>>
 
     init {
         BaseApplication.getComponent()?.inject(this)
         repository = CurrencyRepository()
-        currencies = repository.fetchAll("EUR")
+        repository.fetchAll("EUR")
     }
 
     private val _currencyLiveData = CurrencyLiveData()
