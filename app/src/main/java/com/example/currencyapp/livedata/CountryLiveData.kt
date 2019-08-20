@@ -8,7 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class CountryLiveData(): LiveData<Resource<List<Country>>>() {
+class CountryLiveData : LiveData<Resource<List<Country>>>() {
 
     fun getCountries() = GlobalScope.launch(Dispatchers.Default) {
         GetCountries(

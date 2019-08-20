@@ -11,7 +11,7 @@ object ContextModule {
 
     @Provides
     @Singleton
-    fun proivdeContext(application: Application): Context? {
+    fun provideContext(application: Application): Context? {
         return application.applicationContext
     }
 }
