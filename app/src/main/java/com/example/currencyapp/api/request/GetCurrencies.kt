@@ -22,4 +22,17 @@ class GetCurrencies(
         BaseApplication.getComponent()?.inject(this)
     }
 
+    fun getCurrencies(base: String) {
+        client.getCurrencies(base).enqueue(object : Callback<InternalCurrency> {
+            override fun onFailure(call: Call<InternalCurrency>, throwable: Throwable) {
+                onError(throwable)
+            }
+
+            override fun onResponse(call: Call<InternalCurrency>, response: Response<InternalCurrency>) {
+                if (response.isSuccessful) {
+                    onSuccess(InternalCurrencyMapping.mapCurrency(response.body()))
+                }
+            }
+        })
+    }
 }

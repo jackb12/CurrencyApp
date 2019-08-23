@@ -3,16 +3,12 @@ package com.example.currencyapp.repository
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.liveData
 import com.example.currencyapp.BaseApplication
 import com.example.currencyapp.Resource
 import com.example.currencyapp.Resource.Companion.ERROR
 import com.example.currencyapp.Resource.Companion.SUCCESS
-import com.example.currencyapp.api.InternalCurrencyMapping
 import com.example.currencyapp.api.model.Country
 import com.example.currencyapp.api.model.Currency
-import com.example.currencyapp.api.network.CurrencyClient
-import com.example.currencyapp.api.response.InternalCurrency
 import com.example.currencyapp.livedata.CountryLiveData
 import com.example.currencyapp.livedata.CurrencyLiveData
 import com.example.currencyapp.room.CurrencyDao
@@ -29,9 +25,6 @@ class CurrencyRepository {
 
     @Inject
     lateinit var currencyDao: CurrencyDao
-
-    @Inject
-    lateinit var client: CurrencyClient
 
 //    val currencyRateLiveData: LiveData<CurrencyRate>
 
@@ -54,17 +47,41 @@ class CurrencyRepository {
     }
 
 
-    private fun getCurrencyRates(base: String): Resource<List<CurrencyRate>> = runBlocking {
-        val currency = t(base)
-//        runBlocking {
-//
-//            countryLiveData.getCountries()
-//        }
+    private fun getCurrencyRates(base: String): Resource<List<CurrencyRate>> {
+        val mediator = MediatorLiveData<Pair<Currency?, List<Country>>?>().apply {
+            var lastA: Currency? = null
+            var lastB: List<Country>? = null
 
-        if (currency.value != null) {
+            fun update() {
+                val localLastA = lastA
+                val localLastB = lastB
+                if (localLastA != null && localLastB != null)
+                    this.value = Pair(localLastA, localLastB)
+            }
 
-            val result: List<CurrencyRate>? = currencyLiveData.value?.data?.rates?.mapNotNull { rate ->
-                val country = countryLiveData.value?.data?.firstOrNull {
+            addSource(currencyLiveData) {
+                if (it.status == SUCCESS || it.status == ERROR) {
+                    lastA = it.data
+                    update()
+                }
+            }
+            addSource(countryLiveData) {
+                if (it.status == SUCCESS || it.status == ERROR) {
+                    lastB = it.data
+                    update()
+                }
+            }
+        }
+
+        runBlocking {
+            currencyLiveData.getCurrencies(base)
+            countryLiveData.getCountries()
+        }
+
+        return if (mediator.value?.first != null && mediator.value?.second != null) {
+
+            val result: List<CurrencyRate>? = mediator.value?.first?.rates?.mapNotNull { rate ->
+                val country = mediator.value?.second?.firstOrNull {
                     it.code == rate.key
                 }
 
@@ -80,21 +97,9 @@ class CurrencyRepository {
                 }
             }
 
-            Log.e("TEST", "1")
             Resource.success(result)
         } else {
-            Log.e("TEST", "2")
             Resource.error(Throwable())
         }
     }
-
-
-    private fun t(base: String): LiveData<Currency?> = liveData(Dispatchers.IO) {
-        val c = InternalCurrencyMapping.mapCurrency(getCurrencies(base))
-
-        emit(c)
-    }
-
-    private suspend fun getCurrencies(base: String) = client.getCurrencies(base)
-
 }
