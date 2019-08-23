@@ -33,8 +33,7 @@ class CurrencyViewModel : ViewModel() {
     fun fetchAll(base: String) = repository.fetchAll(base)
 
 
-    fun getCurrencies(base: String) = _currencyLiveData.getCurrencies(base)
+//    fun getCurrencies(base: String) = _currencyLiveData.getCurrencies(base)
 
 
-    fun getCountries() = _countriesLiveData.getCountries()
 }

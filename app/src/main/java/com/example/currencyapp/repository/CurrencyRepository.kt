@@ -1,22 +1,17 @@
 package com.example.currencyapp.repository
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import com.example.currencyapp.BaseApplication
-import com.example.currencyapp.Resource
-import com.example.currencyapp.Resource.Companion.ERROR
-import com.example.currencyapp.Resource.Companion.SUCCESS
-import com.example.currencyapp.api.model.Country
+import com.example.currencyapp.api.InternalCurrencyMapping
 import com.example.currencyapp.api.model.Currency
+import com.example.currencyapp.api.network.CountriesClient
+import com.example.currencyapp.api.network.CurrencyClient
+import com.example.currencyapp.api.response.InternalCurrency
 import com.example.currencyapp.livedata.CountryLiveData
 import com.example.currencyapp.livedata.CurrencyLiveData
 import com.example.currencyapp.room.CurrencyDao
-import com.example.currencyapp.room.CurrencyRate
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
+import java.lang.Exception
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,6 +20,12 @@ class CurrencyRepository {
 
     @Inject
     lateinit var currencyDao: CurrencyDao
+
+    @Inject
+    lateinit var currencyClient: CurrencyClient
+
+    @Inject
+    lateinit var countriesClient: CountriesClient
 
 //    val currencyRateLiveData: LiveData<CurrencyRate>
 
@@ -40,66 +41,36 @@ class CurrencyRepository {
         val currencyRatesFromDatabase = currencyDao.getAll()
         val currencyRatesFromApi = getCurrencyRates(base)
 
-        currencyRatesFromApi.data?.map {
-            Log.e("REPOSITORY", "$it")
-        }
+//        currencyRatesFromApi.data?.map {
+//            Log.e("REPOSITORY", "$it")
+//        }
 
     }
 
 
-    private fun getCurrencyRates(base: String): Resource<List<CurrencyRate>> {
-        val mediator = MediatorLiveData<Pair<Currency?, List<Country>>?>().apply {
-            var lastA: Currency? = null
-            var lastB: List<Country>? = null
+    private fun getCurrencyRates(base: String) = GlobalScope.launch(Dispatchers.Default) {
 
-            fun update() {
-                val localLastA = lastA
-                val localLastB = lastB
-                if (localLastA != null && localLastB != null)
-                    this.value = Pair(localLastA, localLastB)
+        try {
+            val currency = getCurrencyAsync(base)
+            val countries = getCountries()
+            if (currency != null) {
+                Log.e("TEST", "$currency")
+            } else {
+                Log.e("TEST", "2")
             }
+        } catch (e: Exception) {
+            Log.e("TEST", "3")
+        }
+//            runBlocking {
+//                currencyLiveData.getCurrencies(base)
+//                countryLiveData.getCountries()
+//            }
 
-            addSource(currencyLiveData) {
-                if (it.status == SUCCESS || it.status == ERROR) {
-                    lastA = it.data
-                    update()
-                }
-            }
-            addSource(countryLiveData) {
-                if (it.status == SUCCESS || it.status == ERROR) {
-                    lastB = it.data
-                    update()
-                }
-            }
+//          Resource.error(Throwable(""))
         }
 
-        runBlocking {
-            currencyLiveData.getCurrencies(base)
-            countryLiveData.getCountries()
-        }
 
-        return if (mediator.value?.first != null && mediator.value?.second != null) {
+    private suspend fun getCurrencyAsync(base: String): Currency? = InternalCurrencyMapping.mapCurrency(currencyClient.getCurrenciesAsync(base))
 
-            val result: List<CurrencyRate>? = mediator.value?.first?.rates?.mapNotNull { rate ->
-                val country = mediator.value?.second?.firstOrNull {
-                    it.code == rate.key
-                }
-
-                if (country != null) {
-                    CurrencyRate(
-                        rate.key,
-                        country.name,
-                        country.flag,
-                        rate.value
-                    )
-                } else {
-                    null
-                }
-            }
-
-            Resource.success(result)
-        } else {
-            Resource.error(Throwable())
-        }
-    }
+    private suspend fun getCountries() = countriesClient.getCountries()
 }

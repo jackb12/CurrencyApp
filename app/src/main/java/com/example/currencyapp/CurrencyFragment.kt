@@ -69,7 +69,7 @@ class CurrencyFragment : Fragment() {
             }
         })
 
-
+        viewModel.fetchAll("EUR")
 //        viewModel.getCountries()
 //        viewModel.getCurrencies(EUR)
     }
