@@ -9,17 +9,4 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class CurrencyLiveData : LiveData<Resource<Currency>>() {
-
-    fun getCurrencies(base: String) = GlobalScope.launch {
-        val liveData = MutableLiveData<Resource<Currency>>()
-        GetCurrencies(
-            {
-                postValue(Resource.success(it))
-            },
-            {
-                postValue(Resource.error(it))
-            }
-        ).getCurrencies(base)
-    }
-}
+class CurrencyLiveData : LiveData<Resource<Currency>>()

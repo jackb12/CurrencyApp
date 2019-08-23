@@ -8,6 +8,6 @@ import retrofit2.http.Query
 interface CurrencyClient {
 
     @GET("latest")
-    fun getCurrencies(@Query("base") base: String): Call<InternalCurrency>
+    suspend fun getCurrencies(@Query("base") base: String): InternalCurrency
 
 }
