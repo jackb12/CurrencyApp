@@ -1,6 +1,5 @@
 package com.example.currencyapp.repository
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.example.currencyapp.BaseApplication
 import com.example.currencyapp.R
@@ -9,6 +8,7 @@ import com.example.currencyapp.Resource.Companion.ERROR
 import com.example.currencyapp.Resource.Companion.SUCCESS
 import com.example.currencyapp.api.InternalCountryMapping
 import com.example.currencyapp.api.InternalCurrencyMapping
+import com.example.currencyapp.api.model.Country
 import com.example.currencyapp.api.model.Currency
 import com.example.currencyapp.api.network.CountriesClient
 import com.example.currencyapp.api.network.CurrencyClient
@@ -45,11 +45,10 @@ class CurrencyRepository {
         val currencyRatesFromApi: Resource<List<CurrencyRate>> = try {
             getCurrencyRates(base)
         } catch (e: Exception) {
-            Log.e("TEST", "3")
-            Resource.error(Throwable(""))
+            Resource.error(Throwable(BaseApplication.getInstance()?.applicationContext?.getString(R.string.currency_connection_error)))
         }
 
-        when(currencyRatesFromApi.status) {
+        when (currencyRatesFromApi.status) {
             SUCCESS -> {
                 currencyRatesFromApi.data?.let {
                     currencyDao.insertAll(it)
@@ -76,20 +75,38 @@ class CurrencyRepository {
         val currencies = getCurrencyAsync(base)
         val countries = getCountries()
         return if (currencies != null && !countries.isNullOrEmpty()) {
-            Resource.success(currencies.rates.map { currency ->
-                val country = countries.firstOrNull { it.code == currency.key }
-
-                CurrencyRate(
-                    currency.key,
-                    country?.name,
-                    country?.flag,
-                    currency.value
-                )
-            })
+            Resource.success(mapRates(currencies, countries))
         } else {
             Resource.error(Throwable(BaseApplication.getInstance()?.applicationContext?.getString(R.string.currency_error)))
         }
     }
+
+    private fun mapRates(
+        currencies: Currency,
+        countries: List<Country>
+    ): List<CurrencyRate> = ArrayList<CurrencyRate>().apply {
+        val baseCountry = countries.firstOrNull { it.code == currencies.base }
+
+        add(
+            CurrencyRate(
+                currencies.base,
+                baseCountry?.name,
+                baseCountry?.flag,
+                1.0f
+            )
+        )
+
+        addAll(currencies.rates.map { currency ->
+            val country = countries.firstOrNull { it.code == currency.key }
+
+            CurrencyRate(
+                currency.key,
+                country?.name,
+                country?.flag,
+                currency.value
+            )
+        })
+    }.toList()
 
 
     private suspend fun getCurrencyAsync(base: String): Currency? =

@@ -18,8 +18,6 @@ class CurrencyViewModel : ViewModel() {
         repository.fetchAll("EUR")
     }
 
-    fun fetchAll(base: String) {
-        repository.fetchAll(base)
-    }
 
+    fun getLatestRates() {}
 }

@@ -3,4 +3,5 @@
 
     <string name="toolbar_title">Rates</string>
     <string name="currency_error">Unable to retrieve currencies, please try again</string>
+    <string name="currency_connection_error">Unable to retrieve currencies, please check your connection</string>
 </resources>

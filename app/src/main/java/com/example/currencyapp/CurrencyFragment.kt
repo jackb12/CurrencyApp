@@ -2,32 +2,21 @@ package com.example.currencyapp
 
 import android.os.Bundle
 import android.util.Log
-
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.RecyclerView
-import butterknife.BindView
 import com.example.currencyapp.Resource.Companion.ERROR
+import com.example.currencyapp.Resource.Companion.LOADING
 import com.example.currencyapp.Resource.Companion.SUCCESS
-import com.example.currencyapp.api.model.Country
 import com.example.currencyapp.api.model.Currency
+import kotlinx.android.synthetic.main.fragment_currency.*
 
 class CurrencyFragment : Fragment() {
 
-    lateinit var viewModel: CurrencyViewModel
-
-    @BindView(R.id.currency_recycler_view)
-    lateinit var recyclerView: RecyclerView
-
-    @BindView(R.id.loading_view)
-    lateinit var loadingView: View
-
-    @BindView(R.id.error_view)
-    lateinit var errorView: View
+    private lateinit var viewModel: CurrencyViewModel
 
     companion object {
         private const val EUR = "EUR"
@@ -51,24 +40,31 @@ class CurrencyFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        currencyRecyclerView.adapter = CurrencyAdapter { base -> getCurrencyRate(base) }
 
-        viewModel.currencies.observe(viewLifecycleOwner, Observer {
-            it.data?.map {
-                Log.e("REPOSITORY", "$it")
+        viewModel.currencies.observe(viewLifecycleOwner, Observer { resource ->
+            when (resource.status) {
+                SUCCESS -> {
+                    resource.data?.let { (currencyRecyclerView.adapter as CurrencyAdapter).setItems(it) }
+                }
+                LOADING -> {
+                    onLoading()
+                }
+                ERROR -> {
+                    onLoadingFailed()
+                }
             }
         })
+    }
 
-        viewModel.fetchAll("EUR")
+
+    private fun getCurrencyRate(base: String) {
+        Log.e("CURRENCY", base)
     }
 
 
     private fun onLoaded(currency: Currency) {
         Log.e("CURRENCY", "$currency")
-    }
-
-
-    private fun onLoaded2(countries: List<Country>) {
-        Log.e("COUNTRIES", "$countries")
     }
 
 

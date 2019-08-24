@@ -5,21 +5,22 @@
                                                    android:layout_height="match_parent">
 
     <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/currency_recycler_view"
-            android:layout_width="@dimen/match_constraints"
+            android:id="@+id/currencyRecyclerView"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
     <include
-            android:id="@+id/error_view"
+            android:id="@+id/errorView"
             layout="@layout/view_error"
             android:visibility="gone"/>
 
     <include
-            android:id="@+id/loading_view"
+            android:id="@+id/loadingView"
             layout="@layout/view_loading"
             android:visibility="gone"/>
 
