@@ -74,7 +74,7 @@ class CurrencyFragment : Fragment() {
 
     private fun getCurrencyRate(base: String) {
         Log.e("CURRENCY", base)
-        viewModel.getLatestRates(base)
+//        viewModel.getLatestRates(base)
     }
 
 
