@@ -20,7 +20,7 @@ data class InternalCurrency(
             typeOfT: Type?,
             context: JsonDeserializationContext?
         ): HashMap<String, Float> {
-            return Gson().fromJson(json, object : TypeToken<HashMap<String, String>>() {}.type) as HashMap<String, Float>
+            return Gson().fromJson(json, object : TypeToken<HashMap<String, Float>>() {}.type) as HashMap<String, Float>
         }
     }
 }

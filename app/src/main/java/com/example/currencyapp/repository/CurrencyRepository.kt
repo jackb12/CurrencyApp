@@ -1,17 +1,22 @@
 package com.example.currencyapp.repository
 
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import com.example.currencyapp.BaseApplication
+import com.example.currencyapp.R
+import com.example.currencyapp.Resource
+import com.example.currencyapp.Resource.Companion.ERROR
+import com.example.currencyapp.Resource.Companion.SUCCESS
+import com.example.currencyapp.api.InternalCountryMapping
 import com.example.currencyapp.api.InternalCurrencyMapping
 import com.example.currencyapp.api.model.Currency
 import com.example.currencyapp.api.network.CountriesClient
 import com.example.currencyapp.api.network.CurrencyClient
-import com.example.currencyapp.api.response.InternalCurrency
-import com.example.currencyapp.livedata.CountryLiveData
-import com.example.currencyapp.livedata.CurrencyLiveData
 import com.example.currencyapp.room.CurrencyDao
-import kotlinx.coroutines.*
-import java.lang.Exception
+import com.example.currencyapp.room.CurrencyRate
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -27,10 +32,7 @@ class CurrencyRepository {
     @Inject
     lateinit var countriesClient: CountriesClient
 
-//    val currencyRateLiveData: LiveData<CurrencyRate>
-
-    private val currencyLiveData = CurrencyLiveData()
-    private val countryLiveData = CountryLiveData()
+    var currencyRates = MutableLiveData<Resource<List<CurrencyRate>>>()
 
     init {
         BaseApplication.getComponent()?.inject(this)
@@ -38,39 +40,62 @@ class CurrencyRepository {
     }
 
     fun fetchAll(base: String) = GlobalScope.launch(Dispatchers.Default) {
+        currencyRates.postValue(Resource.loading())
         val currencyRatesFromDatabase = currencyDao.getAll()
-        val currencyRatesFromApi = getCurrencyRates(base)
+        val currencyRatesFromApi: Resource<List<CurrencyRate>> = try {
+            getCurrencyRates(base)
+        } catch (e: Exception) {
+            Log.e("TEST", "3")
+            Resource.error(Throwable(""))
+        }
 
-//        currencyRatesFromApi.data?.map {
-//            Log.e("REPOSITORY", "$it")
-//        }
+        when(currencyRatesFromApi.status) {
+            SUCCESS -> {
+                currencyRatesFromApi.data?.let {
+                    currencyDao.insertAll(it)
+                    currencyRates.postValue(Resource.success(it))
+                }
+            }
+            ERROR -> {
+                if (currencyRatesFromDatabase.isNullOrEmpty()) {
+                    currencyRatesFromApi.error?.let {
+                        currencyRates.postValue(Resource.error(it))
+                    }
+                } else {
+                    currencyRates.postValue(Resource.errorWithPayload(currencyRatesFromDatabase))
+                }
+            }
+            else -> {
 
+            }
+        }
     }
 
 
-    private fun getCurrencyRates(base: String) = GlobalScope.launch(Dispatchers.Default) {
+    private suspend fun getCurrencyRates(base: String): Resource<List<CurrencyRate>> {
+        val currencies = getCurrencyAsync(base)
+        val countries = getCountries()
+        return if (currencies != null && !countries.isNullOrEmpty()) {
+            Resource.success(currencies.rates.map { currency ->
+                val country = countries.firstOrNull { it.code == currency.key }
 
-        try {
-            val currency = getCurrencyAsync(base)
-            val countries = getCountries()
-            if (currency != null) {
-                Log.e("TEST", "$currency")
-            } else {
-                Log.e("TEST", "2")
-            }
-        } catch (e: Exception) {
-            Log.e("TEST", "3")
+                CurrencyRate(
+                    currency.key,
+                    country?.name,
+                    country?.flag,
+                    currency.value
+                )
+            })
+        } else {
+            Resource.error(Throwable(BaseApplication.getInstance()?.applicationContext?.getString(R.string.currency_error)))
         }
-//            runBlocking {
-//                currencyLiveData.getCurrencies(base)
-//                countryLiveData.getCountries()
-//            }
-
-//          Resource.error(Throwable(""))
-        }
+    }
 
 
-    private suspend fun getCurrencyAsync(base: String): Currency? = InternalCurrencyMapping.mapCurrency(currencyClient.getCurrenciesAsync(base))
+    private suspend fun getCurrencyAsync(base: String): Currency? =
+        InternalCurrencyMapping.mapCurrency(currencyClient.getCurrenciesAsync(base))
 
-    private suspend fun getCountries() = countriesClient.getCountries()
+
+    private suspend fun getCountries() =
+        InternalCountryMapping.mapCountries(countriesClient.getCountries())
 }

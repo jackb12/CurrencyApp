@@ -1,9 +1,6 @@
 package com.example.currencyapp.room
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 
 @Dao
 interface CurrencyDao {
@@ -12,10 +9,10 @@ interface CurrencyDao {
     fun getAll(): List<CurrencyRate>
 
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(currencyRates: List<CurrencyRate>)
 
 
-    @Update
+    @Update(onConflict = OnConflictStrategy.REPLACE)
     fun updateCurrencies(vararg currencyRates: CurrencyRate)
 }

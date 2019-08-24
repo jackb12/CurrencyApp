@@ -40,38 +40,25 @@ class CurrencyFragment : Fragment() {
     }
 
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_currency, container, false)
     }
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.countriesLiveData.observe(viewLifecycleOwner, Observer<Resource<List<Country>>> { resource ->
-            when (resource.status) {
-                SUCCESS -> {
-                    resource.data?.let {
-                        onLoaded2(it)
-                    }
-                }
-                ERROR -> onLoadingFailed()
-            }
-        })
 
-        viewModel.currencyLiveData.observe(viewLifecycleOwner, Observer<Resource<Currency>> { resource ->
-            when (resource.status) {
-                SUCCESS -> {
-                    resource.data?.let {
-                        onLoaded(it)
-                    }
-                }
-                ERROR -> onLoadingFailed()
+        viewModel.currencies.observe(viewLifecycleOwner, Observer {
+            it.data?.map {
+                Log.e("REPOSITORY", "$it")
             }
         })
 
         viewModel.fetchAll("EUR")
-//        viewModel.getCountries()
-//        viewModel.getCurrencies(EUR)
     }
 
 
