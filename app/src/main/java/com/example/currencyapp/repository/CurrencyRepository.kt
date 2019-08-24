@@ -45,7 +45,7 @@ class CurrencyRepository {
         val currencyRatesFromApi: Resource<List<CurrencyRate>> = try {
             getCurrencyRates(base)
         } catch (e: Exception) {
-            Resource.error(Throwable(BaseApplication.getInstance()?.applicationContext?.getString(R.string.currency_connection_error)))
+            getDefaultError()
         }
 
         when (currencyRatesFromApi.status) {
@@ -71,13 +71,63 @@ class CurrencyRepository {
     }
 
 
+    fun fetchCurrencies(base: String) = GlobalScope.launch(Dispatchers.Default) {
+        val updatedCurrencies = getUpdatedCurrencyRates(base)
+        when (updatedCurrencies.status) {
+            SUCCESS -> {
+                updatedCurrencies.data?.let {
+                    currencyDao.updateCurrencies(it)
+                    currencyRates.postValue(Resource.success(currencyDao.getAll()))
+                }
+            }
+            ERROR -> {
+
+            }
+            else -> {
+
+            }
+        }
+    }
+
+
+    private suspend fun getUpdatedCurrencyRates(base: String): Resource<List<CurrencyRate>> {
+        val currencyRatesFromDatabase = currencyDao.getAll()
+        val currenciesFromApi = getCurrencyAsync(base)
+
+        return if (currenciesFromApi != null) {
+            val updatedCurrencies = currencyRatesFromDatabase.mapNotNull { currencyRate ->
+                findCurrency(base, currencyRate)?.let {
+                    if (currencyRate.currencyRate != it.second) {
+                        currencyRate.copy(currencyRate = it.second)
+                    } else {
+                        null
+                    }
+                }
+            }
+
+            Resource.success(updatedCurrencies)
+        } else {
+            getDefaultError()
+        }
+    }
+
+
+    private fun findCurrency(base: String, currencyRate: CurrencyRate): Pair<String, Float>? {
+        return if (currencyRate.currencyCode == base) {
+            Pair(currencyRate.currencyCode, 1.0F)
+        } else {
+            Pair(currencyRate.currencyCode, currencyRate.currencyRate)
+        }
+    }
+
+
     private suspend fun getCurrencyRates(base: String): Resource<List<CurrencyRate>> {
         val currencies = getCurrencyAsync(base)
         val countries = getCountries()
         return if (currencies != null && !countries.isNullOrEmpty()) {
             Resource.success(mapRates(currencies, countries))
         } else {
-            Resource.error(Throwable(BaseApplication.getInstance()?.applicationContext?.getString(R.string.currency_error)))
+            getDefaultError()
         }
     }
 
@@ -115,4 +165,15 @@ class CurrencyRepository {
 
     private suspend fun getCountries() =
         InternalCountryMapping.mapCountries(countriesClient.getCountries())
+
+
+    private fun getDefaultError() =
+        Resource.error<List<CurrencyRate>>(
+            Throwable(
+                BaseApplication.getInstance()?.applicationContext?.getString(
+                    R.string.currency_connection_error
+                )
+            )
+        )
+
 }

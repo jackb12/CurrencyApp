@@ -14,5 +14,5 @@ interface CurrencyDao {
 
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    fun updateCurrencies(vararg currencyRates: CurrencyRate)
+    fun updateCurrencies(currencyRates: List<CurrencyRate>)
 }

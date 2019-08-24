@@ -46,7 +46,7 @@ class CurrencyFragment : Fragment() {
                 currencyRecyclerView.post {
                     (currencyRecyclerView.adapter as CurrencyAdapter).notifyItemRangeChanged(
                         CurrencyAdapter.FIRST_INDEX + 1,
-                        (currencyRecyclerView.adapter as CurrencyAdapter).currencies.size
+                        (currencyRecyclerView.adapter as CurrencyAdapter).itemCount
                     )
                 }
             }
@@ -74,11 +74,12 @@ class CurrencyFragment : Fragment() {
 
     private fun getCurrencyRate(base: String) {
         Log.e("CURRENCY", base)
+        viewModel.getLatestRates(base)
     }
 
 
     private fun onLoaded(currency: Currency) {
-        Log.e("CURRENCY", "$currency")
+
     }
 
 
