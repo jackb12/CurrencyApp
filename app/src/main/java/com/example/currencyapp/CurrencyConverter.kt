@@ -4,7 +4,13 @@ import java.text.DecimalFormat
 
 object CurrencyConverter {
 
-    private val CURRENCY_FORMAT = DecimalFormat("0.00")
+    private val currencyFormat = DecimalFormat("0.00")
 
-    fun getAmount(rate: Float, amount: Float): String = CURRENCY_FORMAT.format((amount * rate))
+    fun getFormattedAmount(rate: Float, amount: Float): String = currencyFormat.format(getAmount(amount, rate))
+
+
+    fun getNumericalAmount(amount: String): Float = currencyFormat.parse(amount).toFloat()
+
+
+    fun getAmount(amount: Float, rate: Float): Float = (amount * rate)
 }

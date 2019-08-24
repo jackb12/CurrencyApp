@@ -40,12 +40,26 @@ class CurrencyFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        currencyRecyclerView.adapter = CurrencyAdapter { base -> getCurrencyRate(base) }
+        currencyRecyclerView.adapter = CurrencyAdapter(
+            { base -> getCurrencyRate(base) },
+            {
+                currencyRecyclerView.post {
+                    (currencyRecyclerView.adapter as CurrencyAdapter).notifyItemRangeChanged(
+                        CurrencyAdapter.FIRST_INDEX + 1,
+                        (currencyRecyclerView.adapter as CurrencyAdapter).currencies.size
+                    )
+                }
+            }
+        )
 
         viewModel.currencies.observe(viewLifecycleOwner, Observer { resource ->
             when (resource.status) {
                 SUCCESS -> {
-                    resource.data?.let { (currencyRecyclerView.adapter as CurrencyAdapter).setItems(it) }
+                    resource.data?.let {
+                        (currencyRecyclerView.adapter as CurrencyAdapter).setItems(
+                            it
+                        )
+                    }
                 }
                 LOADING -> {
                     onLoading()

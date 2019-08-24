@@ -6,10 +6,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.currencyapp.room.CurrencyRate
 
 class CurrencyAdapter(
-    private val onFocusChanged: (String) -> Unit
+    private val onFocusChanged: (String) -> Unit,
+    private val onLostFocus: (Float) -> Unit
 ): RecyclerView.Adapter<CurrencyViewHolder>() {
 
-    private var currencies: MutableList<CurrencyRate> = mutableListOf()
+    var currencies: MutableList<CurrencyRate> = mutableListOf()
 
     private var baseAmount: Float = DEFAULT_BASE_AMOUNT
 
@@ -24,7 +25,7 @@ class CurrencyAdapter(
             { currencyRate ->
                 onFocus(currencyRate)
             },
-            {}
+            { amount -> onLoseFocus(amount) }
         )
 
 
@@ -49,5 +50,11 @@ class CurrencyAdapter(
         currencies.add(FIRST_INDEX, currencyRate)
         notifyItemMoved(focusedPosition, FIRST_INDEX)
         onFocusChanged(currencyRate.currencyCode)
+    }
+
+
+    private fun onLoseFocus(amount: Float) {
+        this.baseAmount = amount
+        onLostFocus(amount)
     }
 }

@@ -1,23 +1,28 @@
 package com.example.currencyapp
 
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.currencyapp.CurrencyConverter.getAmount
+import com.example.currencyapp.CurrencyConverter.getFormattedAmount
+import com.example.currencyapp.CurrencyConverter.getNumericalAmount
 import com.example.currencyapp.room.CurrencyRate
 
 class CurrencyViewHolder(
     itemVIew: View,
     private val onAmountFocus: (CurrencyRate) -> Unit,
-    private val onAmountChanged: (Float) -> Unit
+    private val onLoseFocus: (Float) -> Unit
 ) : RecyclerView.ViewHolder(itemVIew) {
 
     private val currencyCountryImage = itemVIew.findViewById<ImageView>(R.id.currency_country_image)
     private val currencyCode = itemVIew.findViewById<TextView>(R.id.currency_country_code)
     private val currencyDescription = itemVIew.findViewById<TextView>(R.id.currency_description)
-    private val currencyAmount = itemVIew.findViewById<TextView>(R.id.currency_amount)
+    private val currencyAmount = itemVIew.findViewById<EditText>(R.id.currency_amount)
 
     fun onBind(currency: CurrencyRate, baseAmount: Float) = itemView.apply {
         Glide
@@ -29,12 +34,28 @@ class CurrencyViewHolder(
 
         currencyCode.text = currency.currencyCode
         currencyDescription.text = currency.currencyDescription
-        currencyAmount.text = getAmount(currency.currencyRate, baseAmount).toString()
+        currencyAmount.setText(getFormattedAmount(currency.currencyRate, baseAmount))
 
         currencyAmount.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 onAmountFocus(currency)
             }
         }
+
+        currencyAmount.addTextChangedListener(object: TextWatcher{
+            override fun afterTextChanged(amount: Editable?) {
+                if (currencyAmount.isFocused) {
+                    onLoseFocus(getAmount(getNumericalAmount(amount.toString()), currency.currencyRate))
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+            }
+        })
     }
 }
