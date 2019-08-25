@@ -8,8 +8,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.currencyapp.Resource.Companion.ERROR
 import com.example.currencyapp.Resource.Companion.LOADING
 import com.example.currencyapp.Resource.Companion.SUCCESS
@@ -42,10 +40,10 @@ class CurrencyFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        currencyRecyclerView.itemAnimator = null
         currencyRecyclerView.adapter = CurrencyAdapter(
             { base ->
                 getCurrencyRate(base)
-//                currencyRecyclerView.layoutManager?.scrollToPosition(0)
             },
             {
                 currencyRecyclerView.post {
@@ -65,12 +63,15 @@ class CurrencyFragment : Fragment() {
                             it
                         )
                     }
+
+                    viewModel.startRunnable()
                 }
                 LOADING -> {
                     onLoading()
                 }
                 ERROR -> {
                     onLoadingFailed()
+                    viewModel.stopRunnable()
                 }
             }
         })

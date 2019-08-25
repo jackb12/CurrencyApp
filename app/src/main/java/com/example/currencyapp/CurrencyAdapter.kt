@@ -6,11 +6,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.currencyapp.room.CurrencyRate
 import android.text.Editable
 import android.text.TextWatcher
+import kotlinx.android.synthetic.main.fragment_currency.*
 
 
 class CurrencyAdapter(
     private val onFocusChanged: (String) -> Unit,
-    private val onLostFocus: (Float) -> Unit
+    private val onLostFocus: () -> Unit
 ) : RecyclerView.Adapter<CurrencyViewHolder>() {
 
     var currencies: MutableList<CurrencyRate> = mutableListOf()
@@ -45,13 +46,19 @@ class CurrencyAdapter(
 
         holder.currencyAmount.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(amount: Editable?) {
-                if (holder.currencyAmount.isFocused) {
-                    baseAmount = amount.toString().toFloat()
+                if (position == 0 && holder.currencyAmount.isFocused) {
+                    val baseAmount: Float = if (holder.currencyAmount.text.toString().isEmpty()) {
+                        0F
+                    } else {
+                        holder.currencyAmount.text.toString().toFloat()
+                    }
+
                     onLoseFocus(
                         CurrencyConverter.getAmount(
                             CurrencyConverter.getNumericalAmount(
-                                amount.toString()
-                            ), currency.currencyRate
+                                baseAmount.toString()
+                            ),
+                            currency.currencyRate
                         )
                     )
                 }
@@ -83,13 +90,17 @@ class CurrencyAdapter(
 
     private fun updateItems(currencies: List<CurrencyRate>) {
         this.currencies = (this.currencies).map { currentCurrencyRate ->
-            val updatedCurrency = currencies.first { it.currencyCode == currentCurrencyRate.currencyCode }
+            val updatedCurrency =
+                currencies.first { it.currencyCode == currentCurrencyRate.currencyCode }
             currentCurrencyRate.copy(currencyRate = updatedCurrency.currencyRate)
         }.toMutableList()
 
-        onChange = false
-
-        notifyDataSetChanged()
+        if (onChange) {
+            onChange = false
+            notifyDataSetChanged()
+        } else {
+            notifyItemRangeChanged(FIRST_INDEX + 1, itemCount - 1)
+        }
     }
 
 
@@ -106,6 +117,6 @@ class CurrencyAdapter(
 
     private fun onLoseFocus(amount: Float) {
         this.baseAmount = amount
-        onLostFocus(amount)
+        onLostFocus()
     }
 }

@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
+
 @Singleton
 class CurrencyRepository {
 
@@ -72,20 +73,24 @@ class CurrencyRepository {
 
 
     fun fetchCurrencies(base: String) = GlobalScope.launch(Dispatchers.Default) {
-        val updatedCurrencies = getUpdatedCurrencyRates(base)
-        when (updatedCurrencies.status) {
-            SUCCESS -> {
-                updatedCurrencies.data?.let {
-                    currencyDao.updateCurrencies(it)
-                    currencyRates.postValue(Resource.success(currencyDao.getAll()))
+        try {
+            val updatedCurrencies = getUpdatedCurrencyRates(base)
+            when (updatedCurrencies.status) {
+                SUCCESS -> {
+                    updatedCurrencies.data?.let {
+                        currencyDao.updateCurrencies(it)
+                        currencyRates.postValue(Resource.success(currencyDao.getAll()))
+                    }
+                }
+                ERROR -> {
+
+                }
+                else -> {
+
                 }
             }
-            ERROR -> {
-
-            }
-            else -> {
-
-            }
+        } catch (e: Exception) {
+            getDefaultError()
         }
     }
 
