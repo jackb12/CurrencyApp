@@ -5,13 +5,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.example.currencyapp.repository.CurrencyRepository
 import com.example.currencyapp.room.CurrencyRate
-import androidx.core.os.HandlerCompat.postDelayed
-
 
 
 class CurrencyViewModel : ViewModel() {
 
-    private var repository: CurrencyRepository
+    private val repository: CurrencyRepository = CurrencyRepository()
     var base: String = DEFAULT_BASE
 
     private var shouldStopLoop = false
@@ -20,7 +18,12 @@ class CurrencyViewModel : ViewModel() {
 
     private val runnable: Runnable = object : Runnable {
         override fun run() {
-            getLatestRates(base)
+            if (currencies.value == null) {
+                repository.fetchAll(base)
+            } else {
+                getLatestRates(base)
+            }
+
             if (!shouldStopLoop) {
                 handler.postDelayed(this, 1000)
             }
@@ -36,7 +39,6 @@ class CurrencyViewModel : ViewModel() {
 
     init {
         BaseApplication.getComponent()?.inject(this)
-        repository = CurrencyRepository()
         repository.fetchAll(DEFAULT_BASE)
     }
 

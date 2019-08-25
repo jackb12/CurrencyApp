@@ -10,6 +10,7 @@
     <dimen name="toolbar_start_margin">64dp</dimen>
 
     <dimen name="large_text_size">16sp</dimen>
+    <dimen name="huge_text_size">24sp</dimen>
 
     <dimen name="min_button_width">48dp</dimen>
     <dimen name="min_button_height">48dp</dimen>

@@ -43,11 +43,8 @@ class CurrencyRepository {
     fun fetchAll(base: String) = GlobalScope.launch(Dispatchers.Default) {
         currencyRates.postValue(Resource.loading())
         val currencyRatesFromDatabase = currencyDao.getAll()
-        val currencyRatesFromApi: Resource<List<CurrencyRate>> = try {
-            getCurrencyRates(base)
-        } catch (e: Exception) {
-            getDefaultError()
-        }
+        val currencyRatesFromApi: Resource<List<CurrencyRate>> = getCurrencyRates(base)
+
 
         when (currencyRatesFromApi.status) {
             SUCCESS -> {
@@ -65,55 +62,64 @@ class CurrencyRepository {
                     currencyRates.postValue(Resource.errorWithPayload(currencyRatesFromDatabase))
                 }
             }
-            else -> {
-
-            }
+            else -> {}
         }
     }
 
 
     fun fetchCurrencies(base: String) = GlobalScope.launch(Dispatchers.Default) {
-        try {
-            val updatedCurrencies = getUpdatedCurrencyRates(base)
-            when (updatedCurrencies.status) {
-                SUCCESS -> {
-                    updatedCurrencies.data?.let {
-                        currencyDao.updateCurrencies(it)
-                        currencyRates.postValue(Resource.success(currencyDao.getAll()))
-                    }
-                }
-                ERROR -> {
-
-                }
-                else -> {
-
+        val updatedCurrencies = getUpdatedCurrencyRates(base)
+        when (updatedCurrencies.status) {
+            SUCCESS -> {
+                updatedCurrencies.data?.let {
+                    currencyDao.updateCurrencies(it)
+                    currencyRates.postValue(Resource.success(currencyDao.getAll()))
                 }
             }
-        } catch (e: Exception) {
-            getDefaultError()
+            ERROR -> {
+                if (updatedCurrencies.data?.isNullOrEmpty() == false) {
+                    currencyRates.postValue(Resource.errorWithPayload(updatedCurrencies.data))
+                } else {
+                    currencyRates.postValue(Resource.error(updatedCurrencies.error ?: getDefaultError()))
+                }
+            }
+            else -> {}
         }
     }
 
 
     private suspend fun getUpdatedCurrencyRates(base: String): Resource<List<CurrencyRate>> {
         val currencyRatesFromDatabase = currencyDao.getAll()
-        val currenciesFromApi = getCurrencyAsync(base)
 
-        return if (currenciesFromApi != null) {
-            val updatedCurrencies = currencyRatesFromDatabase.mapNotNull { currencyRate ->
-                findCurrency(base, currencyRate.currencyCode, currenciesFromApi.rates[currencyRate.currencyCode]).let {
-                    if (it.second != null && currencyRate.currencyRate != it.second) {
-                        currencyRate.copy(currencyRate = it.second!!)
-                    } else {
-                        null
+        return try {
+            val currenciesFromApi = getCurrencyAsync(base)
+
+            if (currenciesFromApi != null) {
+                val updatedCurrencies = currencyRatesFromDatabase.mapNotNull { currencyRate ->
+                    findCurrency(
+                        base,
+                        currencyRate.currencyCode,
+                        currenciesFromApi.rates[currencyRate.currencyCode]
+                    ).let {
+                        if (it.second != null && currencyRate.currencyRate != it.second) {
+                            currencyRate.copy(currencyRate = it.second!!)
+                        } else {
+                            null
+                        }
                     }
+
                 }
 
+                Resource.success(updatedCurrencies)
+            } else {
+                Resource.errorWithPayload(currencyRatesFromDatabase)
             }
-
-            Resource.success(updatedCurrencies)
-        } else {
-            getDefaultError()
+        } catch (exception: Exception) {
+            if (currencyRatesFromDatabase.isEmpty()) {
+                Resource.error(getDefaultError())
+            } else {
+                Resource.errorWithPayload(currencyRatesFromDatabase)
+            }
         }
     }
 
@@ -131,15 +137,18 @@ class CurrencyRepository {
     }
 
 
-    private suspend fun getCurrencyRates(base: String): Resource<List<CurrencyRate>> {
+    private suspend fun getCurrencyRates(base: String): Resource<List<CurrencyRate>> = try {
         val currencies = getCurrencyAsync(base)
         val countries = getCountries()
-        return if (currencies != null && !countries.isNullOrEmpty()) {
+        if (currencies != null && !countries.isNullOrEmpty()) {
             Resource.success(mapRates(currencies, countries))
         } else {
-            getDefaultError()
+            Resource.error(getDefaultError())
         }
+    } catch (exception: Exception) {
+        Resource.error(getDefaultError())
     }
+
 
     private fun mapRates(
         currencies: Currency,
@@ -178,12 +187,9 @@ class CurrencyRepository {
 
 
     private fun getDefaultError() =
-        Resource.error<List<CurrencyRate>>(
-            Throwable(
-                BaseApplication.getInstance()?.applicationContext?.getString(
-                    R.string.currency_connection_error
-                )
+        Exception(
+            BaseApplication.getInstance()?.applicationContext?.getString(
+                R.string.currency_connection_error
             )
         )
-
 }

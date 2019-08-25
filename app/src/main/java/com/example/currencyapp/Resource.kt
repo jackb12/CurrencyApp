@@ -1,11 +1,12 @@
 package com.example.currencyapp
 
 import androidx.annotation.IntDef
+import java.lang.Exception
 
 class Resource<out T>(
     @Status val status: Int,
     val data: T?,
-    val error: Throwable?
+    val error: Exception?
 ) {
 
     companion object {
@@ -19,7 +20,7 @@ class Resource<out T>(
 
         fun <T> success(data: T?) = Resource(SUCCESS, data, null)
 
-        fun <T> error(error: Throwable) = Resource<T>(ERROR, null, error)
+        fun <T> error(error: Exception) = Resource<T>(ERROR, null, error)
 
         fun <T> errorWithPayload(data: T) = Resource(ERROR, data, null)
 

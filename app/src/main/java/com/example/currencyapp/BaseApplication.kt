@@ -30,4 +30,9 @@ class BaseApplication : Application() {
             )
         ).build()
     }
+
+
+    fun setConnectionListener(listener: NetworkReceiver.ConnectionListener) {
+        NetworkReceiver.connectionListener = listener
+    }
 }
