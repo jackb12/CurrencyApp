@@ -14,15 +14,13 @@ import com.example.currencyapp.CurrencyConverter.getNumericalAmount
 import com.example.currencyapp.room.CurrencyRate
 
 class CurrencyViewHolder(
-    itemVIew: View,
-    private val onAmountFocus: (CurrencyRate) -> Unit,
-    private val onLoseFocus: (Float) -> Unit
+    itemVIew: View
 ) : RecyclerView.ViewHolder(itemVIew) {
 
     private val currencyCountryImage = itemVIew.findViewById<ImageView>(R.id.currency_country_image)
     private val currencyCode = itemVIew.findViewById<TextView>(R.id.currency_country_code)
     private val currencyDescription = itemVIew.findViewById<TextView>(R.id.currency_description)
-    private val currencyAmount = itemVIew.findViewById<EditText>(R.id.currency_amount)
+    val currencyAmount: EditText = itemVIew.findViewById(R.id.currency_amount)
 
     fun onBind(currency: CurrencyRate, baseAmount: Float) = itemView.apply {
         Glide
@@ -35,27 +33,7 @@ class CurrencyViewHolder(
         currencyCode.text = currency.currencyCode
         currencyDescription.text = currency.currencyDescription
         currencyAmount.setText(getFormattedAmount(currency.currencyRate, baseAmount))
-
-        currencyAmount.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
-                onAmountFocus(currency)
-            }
-        }
-
-        currencyAmount.addTextChangedListener(object: TextWatcher{
-            override fun afterTextChanged(amount: Editable?) {
-                if (currencyAmount.isFocused) {
-                    onLoseFocus(getAmount(getNumericalAmount(amount.toString()), currency.currencyRate))
-                }
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
-            }
-        })
     }
+
+
 }

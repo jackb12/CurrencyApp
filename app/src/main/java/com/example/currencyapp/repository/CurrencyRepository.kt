@@ -96,13 +96,14 @@ class CurrencyRepository {
 
         return if (currenciesFromApi != null) {
             val updatedCurrencies = currencyRatesFromDatabase.mapNotNull { currencyRate ->
-                findCurrency(base, currencyRate)?.let {
-                    if (currencyRate.currencyRate != it.second) {
-                        currencyRate.copy(currencyRate = it.second)
+                findCurrency(base, currencyRate.currencyCode, currenciesFromApi.rates[currencyRate.currencyCode]).let {
+                    if (it.second != null && currencyRate.currencyRate != it.second) {
+                        currencyRate.copy(currencyRate = it.second!!)
                     } else {
                         null
                     }
                 }
+
             }
 
             Resource.success(updatedCurrencies)
@@ -112,11 +113,15 @@ class CurrencyRepository {
     }
 
 
-    private fun findCurrency(base: String, currencyRate: CurrencyRate): Pair<String, Float>? {
-        return if (currencyRate.currencyCode == base) {
-            Pair(currencyRate.currencyCode, 1.0F)
+    private fun findCurrency(
+        base: String,
+        currencyCode: String,
+        updatedCurrencyRate: Float?
+    ): Pair<String, Float?> {
+        return if (currencyCode == base) {
+            Pair(currencyCode, 1.0F)
         } else {
-            Pair(currencyRate.currencyCode, currencyRate.currencyRate)
+            Pair(currencyCode, updatedCurrencyRate)
         }
     }
 
