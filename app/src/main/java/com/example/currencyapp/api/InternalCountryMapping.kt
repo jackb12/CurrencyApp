@@ -5,7 +5,7 @@ import com.example.currencyapp.api.response.InternalCountry
 
 object InternalCountryMapping {
 
-    private const val EUR = "EUR"
+    const val EUR = "EUR"
 
     fun mapCountries(response: List<InternalCountry>?) = response?.distinctBy {
         it.currencies?.firstOrNull()?.code
