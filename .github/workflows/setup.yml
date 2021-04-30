@@ -32,3 +32,9 @@ jobs:
         run: |
           rm -f ~/.gradle/caches/modules-2/modules-2.lock
           rm -f ~/.gradle/caches/modules-2/gc.properties
+
+    - name: output build as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Package
+        path: build/libs
