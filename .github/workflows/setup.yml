@@ -2,7 +2,7 @@ name: setup
 on: [push]
 jobs:
   setup-and-build
-  runs-on: ubuntu-lateset
+  runs-on: ubuntu-latest
   steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 11
